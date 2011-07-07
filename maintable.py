@@ -1,5 +1,9 @@
 import itertools
 import lxml.html
+import lxml.etree
+import traceback
+from IPython.Shell import IPShellEmbed
+ipshell = IPShellEmbed()
 
 from elev import Elev
 
@@ -16,10 +20,15 @@ def get_data_from_mainTable(main_table):
     for hint, trs in itertools.groupby(main_table.xpath(r'''tr[@hint]'''), get_hint):
         d = {'nume': hint}
         for tr in trs:
-            if tr.find('script') is not None:
-                d.update(get_data_from_tr_with_script(tr))
-            else:
-                d.update(get_data_from_tr_without_script(tr))
+            try:
+                if tr.find('script') is not None:
+                    d.update(get_data_from_tr_with_script(tr))
+                else:
+                    d.update(get_data_from_tr_without_script(tr))
+            except:
+                traceback.print_exc()
+                ipshell()
+                raise
         L.append(Elev(**d))
     return L
 
